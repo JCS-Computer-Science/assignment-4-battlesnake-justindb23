@@ -23,40 +23,40 @@ const config = {
 }
 
 //TODO: respond to GET requests on "/" with the config object above
-app.get("/",(request, response) => {
-  response.json(config)
+app.get("/",(req,res)=>{
+  res.json(config)
 })
-
-function handstart(request, response){
-  response.status(200).send('ok')
-  
-}
 
 //TODO: respond to POST requests on "/start". Your response itself is ignored, but must have status code "200"
 //      the request body will contain objects representing the game instance, game board state, and your snake
 //      https://docs.battlesnake.com/api/requests/start
-function handleMove(request, response){
+function handlestart(request, response){
   let gameData = request.body
-  let safeMoves = ['up', 'down', 'left', 'right']
-  let move = safeMoves[Math.floor(Math.random()*safeMoves.length)]
-  console.log('move: ' + move);
-  response.status(200).send({move:move})
 
+  response.status(200).send('ok')
 }
-
 //TODO: respond to POST requests on "/move". Your response should be an object with a "move" property and optionally
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move
-function handleEnd(request, response){
-  let gameData=request.body
+app.post("/move",handlemove)
+
+function handlemove(request, response){
+  let gameData = request.body
+
+  response.status(200).send(move(gamedata))
 }
 //TODO: respond to POST requests on "/end", which signals the end of a game. Your response itself is ignored, 
 //      but must have status code "200" the request body will contain objects representing the game
 //      https://docs.battlesnake.com/api/requests/end
+let handleEnd(request, response){
+  let gameData=request.body
 
+  console.log('end')
+  response.status(200).send('ok')
+}
 const host = '0.0.0.0';
 const port = process.env.PORT || 8000;
 
 app.listen(port, host, () => {
-  console.log(`Running Battlesnake at http://${host}:${port}...`)
+  console.log(`Running Battlesnake at hhtp://${host}:${port}...`)
 });
