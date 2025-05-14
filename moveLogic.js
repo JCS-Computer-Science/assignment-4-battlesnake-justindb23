@@ -7,7 +7,7 @@ export default function move(gameState){
         y:  Math.floor(gameState.board.height-1)/2
     }
     const nearMid = myHead.x>1 && myHead.x<gameState.board.width-2 && myHead.y>1 && myHead.y<gameState.board.height-2;
-    let targetMoves = {
+    let bestMoves = {
         up: false,
         down: false,
         left: false,
@@ -19,7 +19,7 @@ export default function move(gameState){
         left: true,
         right: true
     };
-    let pathSafety = {
+    let kindaSafe = {
         up: true,
         down: true,
         left: true,
@@ -50,7 +50,7 @@ export default function move(gameState){
                 moveSafety.up = false;
             }
         }
-        //deal with head on collisions
+        
         if (gameState.board.snakes[s].id != gameState.you.id && gameState.board.snakes[s].body.length >= gameState.you.body.length){
             let head = gameState.board.snakes[s].body[0];
             let adjacent = {
@@ -59,13 +59,13 @@ export default function move(gameState){
                 up: {x: myHead.x, y: myHead.y+1},
                 down: {x: myHead.x, y: myHead.y-1}
             };
-            for (let direction in adjacent) {
-                let square = adjacent[direction];
+            for (let dir in adjacent) {
+                let square = adjacent[dir];
                 if ((head.x == square.x - 1 && head.y == square.y) ||
                     (head.x == square.x + 1 && head.y == square.y) ||
                     (head.x == square.x && head.y == square.y - 1) ||
                     (head.x == square.x && head.y == square.y + 1)) {
-                    pathSafety[direction] = false;
+                    kindaSafe[dir] = false;
                 }
             }
         }
@@ -73,8 +73,8 @@ export default function move(gameState){
     function moveTo(pos){
         let xDis = pos.x - myHead.x;
         let yDis = pos.y - myHead.y;
-            if (xDis < 0) {targetMoves.left = true;} else if (xDis > 0){targetMoves.right = true;}
-            if (yDis < 0) {targetMoves.down = true;} else if (yDis > 0){targetMoves.up = true;}
+            if (xDis < 0) {bestMoves.left = true;} else if (xDis > 0){bestMoves.right = true;}
+            if (yDis < 0) {bestMoves.down = true;} else if (yDis > 0){bestMoves.up = true;}
     }
     let isHungry = gameState.you.health < 90  || gameState.you.body.length%2 != 0;
     if(nearMid == false && gameState.you.health>8 && gameState.you.body.length > 4){isHungry = false};
@@ -98,24 +98,19 @@ export default function move(gameState){
             }
         }
         moveTo(closestFood);
-    } else {
+    } else{
         moveTo(myTail);
-    }
-    //Object.keys(moveSafety) returns ["up", "down", "left", "right"]
-    //.filter() filters the array based on the function provided as an argument (using arrow function syntax here)
-    //In this case we want to filter out any of these directions for which moveSafety[direction] == false
+    } 
     let safeMoves = Object.keys(moveSafety).filter(
-        direction => moveSafety[direction] && pathSafety[direction]
+        dir => moveSafety[dir] && kindaSafe[dir]
     );
-    // Fallback to moveSafety only if nothing passes both checks
     if (safeMoves.length === 0) {
         safeMoves = Object.keys(moveSafety).filter(
-            direction => moveSafety[direction]
+            dir => moveSafety[dir]
         );
     }
-    // Prioritize targetMoves if any of them are safe
-    const prioritizedMoves = Object.keys(targetMoves).filter(
-        direction => targetMoves[direction] && safeMoves.includes(direction)
+    const prioritizedMoves = Object.keys(bestMoves).filter(
+        dir => bestMoves[dir] && safeMoves.includes(dir)
     );
     const nextMove = (prioritizedMoves.length > 0)
         ? prioritizedMoves[Math.floor(Math.random() * prioritizedMoves.length)]
